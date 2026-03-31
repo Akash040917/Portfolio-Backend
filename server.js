@@ -5,71 +5,109 @@ require("dotenv").config();
 
 const app = express();
 
-// ✅ CORS (allow your domain)
+// ✅ CORS
 app.use(cors({
   origin: "*"
 }));
 
 app.use(express.json());
 
-// 🔥 PORT (Render uses this)
+// 🔥 PORT (Render auto assigns)
 const PORT = process.env.PORT || 5000;
 
-// 🔥 FIXED TRANSPORTER (IMPORTANT)
+// 🔥 FINAL TRANSPORTER (WORKS ON RENDER)
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 587,              // ✅ CHANGED (was 465 ❌)
-  secure: false,          // ✅ MUST be false for 587
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
+  },
+  tls: {
+    rejectUnauthorized: false
   }
 });
 
-// ✅ TEST ROUTE
+// ✅ ROOT CHECK
 app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
 });
 
-// 📩 CONTACT
+// 📩 CONTACT ROUTE
 app.post("/contact", async (req, res) => {
   const { name, email, message } = req.body;
+
+  // ✅ VALIDATION
+  if (!name || !email || !message) {
+    return res.status(400).json({
+      success: false,
+      error: "Missing required fields"
+    });
+  }
 
   try {
     await transporter.sendMail({
       from: `"Portfolio Contact" <${process.env.EMAIL_USER}>`,
       to: process.env.EMAIL_USER,
-      subject: `📩 Contact from ${name}`,
-      text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`
+      subject: `📩 New Contact from ${name}`,
+      html: `
+        <h2>New Contact Message</h2>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Message:</strong><br>${message}</p>
+      `
     });
 
     console.log("Contact mail sent ✅");
+
     res.status(200).json({ success: true });
 
   } catch (err) {
     console.error("Contact error ❌:", err);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
   }
 });
 
-// ⭐ FEEDBACK
+// ⭐ FEEDBACK ROUTE
 app.post("/feedback", async (req, res) => {
   const { name, email, rating, message } = req.body;
+
+  // ✅ VALIDATION
+  if (!name || !email || !rating || !message) {
+    return res.status(400).json({
+      success: false,
+      error: "Missing required fields"
+    });
+  }
 
   try {
     await transporter.sendMail({
       from: `"Portfolio Feedback" <${process.env.EMAIL_USER}>`,
       to: process.env.EMAIL_USER,
       subject: `⭐ Feedback (${rating}/5)`,
-      text: `Name: ${name}\nEmail: ${email}\nRating: ${rating}\nMessage: ${message}`
+      html: `
+        <h2>New Feedback</h2>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Rating:</strong> ${rating}/5</p>
+        <p><strong>Message:</strong><br>${message}</p>
+      `
     });
 
     console.log("Feedback mail sent ✅");
+
     res.status(200).json({ success: true });
 
   } catch (err) {
     console.error("Feedback error ❌:", err);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
   }
 });
 
