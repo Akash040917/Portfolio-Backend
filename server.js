@@ -7,6 +7,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// 🔥 PORT FIX (IMPORTANT)
+const PORT = process.env.PORT || 5000;
+
+// 🔥 Transporter with debug
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -15,7 +19,12 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// CONTACT
+// TEST ROUTE (for checking backend)
+app.get("/", (req, res) => {
+  res.send("Backend is running 🚀");
+});
+
+// 📩 CONTACT
 app.post("/contact", async (req, res) => {
   const { name, email, message } = req.body;
 
@@ -24,21 +33,19 @@ app.post("/contact", async (req, res) => {
       from: process.env.EMAIL_USER,
       to: process.env.EMAIL_USER,
       subject: `📩 Contact from ${name}`,
-      text: `
-Name: ${name}
-Email: ${email}
-Message: ${message}
-      `
+      text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`
     });
 
-    res.json({ success: true });
+    console.log("Contact mail sent ✅");
+
+    res.status(200).json({ success: true });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false });
+    console.error("Contact error ❌:", err);
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// FEEDBACK
+// ⭐ FEEDBACK
 app.post("/feedback", async (req, res) => {
   const { name, email, rating, message } = req.body;
 
@@ -47,23 +54,19 @@ app.post("/feedback", async (req, res) => {
       from: process.env.EMAIL_USER,
       to: process.env.EMAIL_USER,
       subject: `⭐ Feedback (${rating}/5)`,
-      text: `
-Name: ${name}
-Email: ${email}
-Rating: ${rating}
-Message: ${message}
-      `
+      text: `Name: ${name}\nEmail: ${email}\nRating: ${rating}\nMessage: ${message}`
     });
 
-    res.json({ success: true });
+    console.log("Feedback mail sent ✅");
+
+    res.status(200).json({ success: true });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false });
+    console.error("Feedback error ❌:", err);
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
-const PORT = process.env.PORT || 5000;
-
+// START SERVER
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
