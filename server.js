@@ -5,7 +5,7 @@ require("dotenv").config();
 
 const app = express();
 
-// ✅ CORS
+// ✅ CORS (restrict later if needed)
 app.use(cors({
   origin: "*"
 }));
@@ -15,7 +15,11 @@ app.use(express.json());
 // 🔥 PORT (Render auto assigns)
 const PORT = process.env.PORT || 5000;
 
-// 🔥 FINAL TRANSPORTER (WORKS ON RENDER)
+// 🔍 DEBUG ENV (IMPORTANT – remove later)
+console.log("EMAIL_USER:", process.env.EMAIL_USER);
+console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "Loaded ✅" : "Missing ❌");
+
+// 🔥 TRANSPORTER (FINAL FIXED)
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
@@ -29,6 +33,15 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+// 🔍 VERIFY CONNECTION (VERY IMPORTANT)
+transporter.verify((error, success) => {
+  if (error) {
+    console.error("SMTP connection error ❌:", error);
+  } else {
+    console.log("SMTP server ready ✅");
+  }
+});
+
 // ✅ ROOT CHECK
 app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
@@ -38,7 +51,6 @@ app.get("/", (req, res) => {
 app.post("/contact", async (req, res) => {
   const { name, email, message } = req.body;
 
-  // ✅ VALIDATION
   if (!name || !email || !message) {
     return res.status(400).json({
       success: false,
@@ -60,7 +72,6 @@ app.post("/contact", async (req, res) => {
     });
 
     console.log("Contact mail sent ✅");
-
     res.status(200).json({ success: true });
 
   } catch (err) {
@@ -76,7 +87,6 @@ app.post("/contact", async (req, res) => {
 app.post("/feedback", async (req, res) => {
   const { name, email, rating, message } = req.body;
 
-  // ✅ VALIDATION
   if (!name || !email || !rating || !message) {
     return res.status(400).json({
       success: false,
@@ -99,7 +109,6 @@ app.post("/feedback", async (req, res) => {
     });
 
     console.log("Feedback mail sent ✅");
-
     res.status(200).json({ success: true });
 
   } catch (err) {
