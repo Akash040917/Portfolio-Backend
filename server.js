@@ -5,49 +5,49 @@ require("dotenv").config();
 
 const app = express();
 
-// ✅ CORS (restrict later if needed)
+// ✅ CORS
 app.use(cors({
   origin: "*"
 }));
 
 app.use(express.json());
 
-// 🔥 PORT (Render auto assigns)
+// 🔥 PORT
 const PORT = process.env.PORT || 5000;
 
-// 🔍 DEBUG ENV (IMPORTANT – remove later)
+// 🔍 DEBUG ENV
 console.log("EMAIL_USER:", process.env.EMAIL_USER);
 console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "Loaded ✅" : "Missing ❌");
 
-// 🔥 TRANSPORTER (FINAL FIXED)
+// 🔥 FINAL SMTP TRANSPORTER
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
+  port: 465,              // ✅ SSL port
+  secure: true,           // ✅ MUST be true
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   },
-  tls: {
-    rejectUnauthorized: false
-  }
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000
 });
 
-// 🔍 VERIFY CONNECTION (VERY IMPORTANT)
+// 🔍 VERIFY SMTP CONNECTION
 transporter.verify((error, success) => {
   if (error) {
-    console.error("SMTP connection error ❌:", error);
+    console.error("SMTP error ❌:", error);
   } else {
-    console.log("SMTP server ready ✅");
+    console.log("SMTP ready ✅");
   }
 });
 
-// ✅ ROOT CHECK
+// ✅ ROOT
 app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
 });
 
-// 📩 CONTACT ROUTE
+// 📩 CONTACT
 app.post("/contact", async (req, res) => {
   const { name, email, message } = req.body;
 
@@ -83,7 +83,7 @@ app.post("/contact", async (req, res) => {
   }
 });
 
-// ⭐ FEEDBACK ROUTE
+// ⭐ FEEDBACK
 app.post("/feedback", async (req, res) => {
   const { name, email, rating, message } = req.body;
 
