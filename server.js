@@ -38,7 +38,7 @@ app.post("/contact", async (req, res) => {
 
   try {
     await resend.emails.send({
-      from: "Akash Portfolio <onboarding@resend.dev>", // change later
+      from: "Akash Portfolio <hello@contact.akashraghuramrl.me>", // change later
       to: "akashvijai1794@gmail.com",
       reply_to: email,
       subject: `📩 Contact from ${name}`,
@@ -82,7 +82,7 @@ app.post("/feedback", async (req, res) => {
 
   try {
     await resend.emails.send({
-      from: "Akash Portfolio <onboarding@resend.dev>",
+      from: "Akash Portfolio <hello@contact.akashraghuramrl.me>",
       to: "akashvijai1794@gmail.com",
       reply_to: email,
       subject: `⭐ Feedback (${rating}/5)`,
